@@ -6,8 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,7 +35,8 @@ import com.cxy.seckill.service.SeckillService;
 @RequestMapping("/seckill")//url:/模块/资源/{id}/细分  
 public class SeckillController {
 	
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+//	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LogManager.getLogger(SeckillController.class);
 
 	@Autowired
 	private SeckillService seckillService;
@@ -77,6 +78,7 @@ public class SeckillController {
 		try {
 			SeckillExecution execution = seckillService.executeSeckill(seckillId, phone, md5);
 			result = new SeckillResult<SeckillExecution>(execution, true);
+			logger.info("seckill success");
 		}catch (RepeatKillException e) {
 			logger.error(e.getMessage(),e);
 			SeckillExecution execution = new SeckillExecution(seckillId, SeckillStatEnum.REPEAT_KILL);
@@ -101,6 +103,7 @@ public class SeckillController {
 		try {
 			Exposer exposer = seckillService.exportSeckillUrl(seckillId);
 			result = new SeckillResult<Exposer>(exposer, true);
+			logger.info("秒杀开启:暴露秒杀地址");
 		} catch (ParseException e) {
 			logger.error(e.getMessage(), e);
             result = new SeckillResult<Exposer>(false, e.getMessage());

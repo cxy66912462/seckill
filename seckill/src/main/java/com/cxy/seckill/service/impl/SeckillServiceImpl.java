@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,8 +31,9 @@ import com.cxy.seckill.util.StaticMethod;
 @Service("seckillService")
 public class SeckillServiceImpl implements SeckillService{
 	
-	 private Logger logger = LoggerFactory.getLogger(this.getClass());
-	 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
+//	 private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private Logger logger =  LogManager.getLogger(SeckillServiceImpl.class);
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); 
 
     //注入Service依赖
     @Autowired
@@ -147,7 +148,6 @@ public class SeckillServiceImpl implements SeckillService{
 		try {
 			seckillDao.killByProcedure(paramMap);
 			int result = (int) paramMap.get("result");
-			System.out.println(result);
 			if(result == 1){
 				SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
 				return new SeckillExecution(seckillId, SeckillStatEnum.SUCCESS, successKilled);
