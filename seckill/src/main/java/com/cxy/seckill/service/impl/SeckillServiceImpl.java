@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cxy.seckill.common.SeckillStatEnum;
+import com.cxy.seckill.dao.RedisDao;
 import com.cxy.seckill.dao.SeckillDao;
 import com.cxy.seckill.dao.SuccessKilledDao;
 import com.cxy.seckill.dto.Exposer;
@@ -42,8 +43,8 @@ public class SeckillServiceImpl implements SeckillService{
     @Autowired
     private SuccessKilledDao successKilledDao;
 
-//    @Autowired
-//    private RedisDao redisDao;
+    @Autowired
+    private RedisDao redisDao;
 
 	@Override
 	public List<Seckill> getSeckillList() {
@@ -61,18 +62,18 @@ public class SeckillServiceImpl implements SeckillService{
 	public Exposer exportSeckillUrl(Long seckillId) throws ParseException {
 		 // 优化点:缓存优化:超时的基础上维护一致性
         //1：访问redis
-//        Seckill seckill = redisDao.getSeckill(seckillId);
-//        if (seckill == null) {
-//            //2:访问数据库
-		Seckill seckill = seckillDao.queryById(seckillId);
+        Seckill seckill = redisDao.getSeckill(seckillId);
+        if (seckill == null) {
+        	logger.info("redis get (seckillId:"+seckillId+") is null");
+        	//2:访问数据库
+    		seckill = seckillDao.queryById(seckillId);
             if (seckill == null) {
                 return new Exposer(false, seckillId);
-            } 
-//                else {
-//                //3:放入redis
-//                redisDao.putSeckill(seckill);
-//            }
-//        }
+            }else {
+            	//3:放入redis
+                redisDao.putSeckill(seckill);
+            }
+        }
 
         Date startTime = sdf.parse(seckill.getStartTime());
         Date endTime = sdf.parse(seckill.getEndTime());
